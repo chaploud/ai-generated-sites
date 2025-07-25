@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>インタラクティブ Clojure データベース技術スタックガイド</title>
+  <title>インタラクティブ Clojure データベース技術スタックガイド (総合版)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,8 +13,8 @@
     href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <!-- Chosen Palette: Warm Harmony (A warm, neutral palette of beige and slate, with a calming teal accent for interactive elements, creating a focused and supportive feel.) -->
-  <!-- Application Structure Plan: A single-page, vertical-scrolling application with a sticky top navigation bar. This non-linear structure empowers users to freely explore topics of interest—such as comparing SQL approaches or viewing library popularity—which is more effective for synthesis and learning than the original report's linear format. The designed structure prioritizes user-driven discovery through key sections: an interactive library dashboard, a side-by-side philosophy comparison, a visual model of the recommended technology stack, and clear, digestible cards for best practices. This architecture transforms the static report into a dynamic educational tool. -->
-  <!-- Visualization & Content Choices: Report Info: Library Popularity Table -> Goal: Compare library popularity quickly -> Viz: Interactive Bar Chart (Chart.js) -> Interaction: Hover tooltips with details -> Justification: A chart is far more intuitive and faster to parse for comparison than a table. | Report Info: Recommended Stack Layers -> Goal: Explain the modular architecture -> Viz: A custom diagram built with styled HTML/CSS -> Interaction: Hover effects to highlight layers -> Justification: Visually represents the layered, modular nature of the stack, a key concept in the report. | Report Info: ORM vs. SQL Comparison -> Goal: Contrast the two philosophies -> Viz: Two-column layout with code blocks -> Interaction: None needed, direct side-by-side view is effective -> Justification: Aids understanding of trade-offs. | Report Info: Datalog DBs Comparison -> Goal: Compare Datalog options -> Viz: Enhanced HTML table with icons -> Justification: Improves scannability and visual appeal. -->
+  <!-- Application Structure Plan: This major revision, based on user feedback, elevates the Datalog section to be a first-class citizen alongside the SQL-based stack. The structure is now organized around two main deep-dive sections: "SQL-centric Libraries" and "Datalog Databases." Each section uses a consistent card-based layout to provide detailed explanations, feature lists, and extensive code examples for every major library/database. This parallel structure allows users to effectively compare and contrast the two dominant paradigms in the Clojure ecosystem, transforming the application into a comprehensive educational resource. -->
+  <!-- Visualization & Content Choices: Report Info: Detailed Datalog usage -> Goal: Explain HOW Datalog databases work and WHY they are idiomatic in Clojure -> Viz: A new, dedicated "Datalog Deep Dive" section with detailed cards for Datomic, XTDB, and Datascript. Each card contains philosophy, use cases, and commented code examples. -> Interaction: Consistent card layout for easy comparison with the SQL libraries. -> Justification: Directly addresses user feedback requesting more depth and incorporates previously provided conversational explanations into the core application structure, making the information permanent and shareable. -->
   <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
   <style>
     body {
@@ -73,11 +73,17 @@
       border-radius: 0.75rem;
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
       transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
     }
 
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+    }
+
+    .card-content {
+      flex-grow: 1;
     }
 
     .tag {
@@ -89,6 +95,7 @@
       font-weight: 500;
       padding: 0.25rem 0.75rem;
       border-radius: 9999px;
+      display: inline-block;
     }
 
     .code-block {
@@ -100,6 +107,19 @@
       padding: 1rem;
       overflow-x: auto;
       font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .code-block .comment {
+      color: #A8A29E;
+      /* stone-400 */
+    }
+
+    .section-divider {
+      border-top: 2px dashed #D6D3D1;
+      /* stone-300 */
+      margin-top: 5rem;
+      margin-bottom: 5rem;
     }
   </style>
 </head>
@@ -115,11 +135,11 @@
         <div class="hidden md:block">
           <div id="nav-links" class="ml-10 flex items-baseline space-x-4">
             <a href="#philosophy" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">哲学</a>
-            <a href="#comparison"
-              class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">アプローチ比較</a>
-            <a href="#stack" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">推奨スタック</a>
+            <a href="#sql-stack"
+              class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">SQLスタック</a>
+            <a href="#datalog-stack"
+              class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">Datalogスタック</a>
             <a href="#popularity" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">人気度</a>
-            <a href="#datalog" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">Datalog</a>
             <a href="#practices" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">実践</a>
           </div>
         </div>
@@ -132,88 +152,223 @@
     <section id="philosophy" class="mb-20 text-center">
       <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-stone-900 mb-4">データ中心の哲学</h2>
       <p class="max-w-3xl mx-auto text-lg text-stone-600">
-        Clojureの世界では、データベースはアプリケーションの自然な延長です。オブジェクトとリレーショナルの「インピーダンスミスマッチ」は存在しません。なぜなら、すべてがデータだからです。このガイドでは、その哲学に基づいた最新のデータベース操作技術を探求します。
+        Clojureの世界では、データベースはアプリケーションの自然な延長です。オブジェクトとリレーショナルの「インピーダンスミスマッチ」は存在しません。なぜなら、すべてがデータだからです。このガイドでは、その哲学を体現する二大潮流、SQL中心アプローチとDatalogデータベースを深く探求します。
       </p>
     </section>
 
-    <section id="comparison" class="mb-20">
+    <section id="sql-stack" class="mb-20">
       <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold tracking-tight text-stone-900">アプローチ比較：ORM vs SQL中心</h2>
+        <h2 class="text-3xl font-bold tracking-tight text-stone-900">SQL中心アプローチ 詳細解説</h2>
         <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">
-          Clojureでは、SQLを直接的かつ表現力豊かに扱うアプローチが主流です。ORM的な利便性を提供するライブラリも存在しますが、その思想は異なります。</p>
+          Clojureにおけるデータベース操作の主流。SQLのパワーと透明性を維持しつつ、Clojureのデータ構造と関数で巧みに扱うためのライブラリ群です。</p>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-8">
-        <div class="card p-6">
-          <h3 class="text-2xl font-bold mb-4">SQL中心アプローチ</h3>
-          <p class="text-stone-600 mb-6">
-            クエリをClojureのデータ構造として扱うことで、プログラムによる構築、合成、変換を可能にします。透明性と制御性が高く、Clojureの関数型パラダイムと非常に親和性が高いです。</p>
-          <div class="space-y-2 mb-4">
-            <span class="tag">HoneySQL</span>
-            <span class="tag">HugSQL</span>
+      <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="card">
+          <div class="p-6 card-content">
+            <h3 class="text-2xl font-bold mb-2">next.jdbc</h3>
+            <span class="tag mb-4">接続・実行</span>
+            <p class="text-stone-600 mb-4">ClojureからJDBCデータベースを操作するための、現代的で高速、かつシンプルなライブラリ。接続管理とSQL実行の基盤となります。</p>
+            <h4 class="font-bold mb-2">主な特徴:</h4>
+            <ul class="list-disc list-inside text-stone-600 mb-4">
+              <li>高いパフォーマンス</li>
+              <li>柔軟な結果セットの変換（名前空間修飾キーワード対応）</li>
+              <li>データソースの管理が容易（接続プーリングと連携）</li>
+            </ul>
           </div>
-          <div class="code-block font-mono">
-            <pre><code>;; HoneySQL: クエリをデータとして表現
-{:select [:id :name]
- :from [:users]
- :where [:> :signup_date "2024-01-01"]}
-
-;; HugSQL: SQLファイルから関数を生成
--- :name get-user-by-id :? :1
-SELECT * FROM users WHERE id = :id;</code></pre>
+          <div class="p-6 pt-0">
+            <div class="code-block font-mono">
+              <pre><code>(require '[next.jdbc :as jdbc]'[next.jdbc.sql :as sql])
+<span class="comment">;; データソースの定義 (ここではH2インメモリDB)</span>
+(def ds (jdbc/get-datasource {:dbtype "h2" :dbname "mem:test"}))
+<span class="comment">;; テーブル作成とデータ挿入</span>
+(jdbc/execute! ds ["CREATE TABLE users (id INT, name VARCHAR(50))"])
+(sql/insert! ds :users {:id 1 :name "Alice"})
+<span class="comment">;; データのクエリ</span>
+(sql/query ds ["SELECT * FROM users"])
+<span class="comment">;; => [{:USERS/ID 1, :USERS/NAME "Alice"}]</span></code></pre>
+            </div>
           </div>
         </div>
-        <div class="card p-6">
-          <h3 class="text-2xl font-bold mb-4">ORM的アプローチ</h3>
-          <p class="text-stone-600 mb-6">
-            モデルを定義し、高レベルなAPIでCRUD操作を簡略化します。Clojureでは主流ではありませんが、`Toucan`のようなライブラリがこの利便性を提供します。</p>
-          <div class="space-y-2 mb-4">
-            <span class="tag">Toucan</span>
+
+        <div class="card">
+          <div class="p-6 card-content">
+            <h3 class="text-2xl font-bold mb-2">HoneySQL</h3>
+            <span class="tag mb-4">SQLクエリ構築</span>
+            <p class="text-stone-600 mb-4">SQLクエリをClojureのデータ構造（マップやベクタ）として表現するためのライブラリ。プログラムによる動的なクエリ生成や合成が得意です。</p>
+            <h4 class="font-bold mb-2">主な特徴:</h4>
+            <ul class="list-disc list-inside text-stone-600 mb-4">
+              <li>SQLをデータとして扱えるため、構成可能性が非常に高い</li>
+              <li>複雑な動的クエリの構築が安全かつ容易</li>
+              <li>Clojureの標準関数(`cond->`等)でクエリを操作できる</li>
+            </ul>
           </div>
-          <div class="code-block font-mono">
-            <pre><code>;; Toucan: モデル中心の操作
-(defmodel User :user)
+          <div class="p-6 pt-0">
+            <div class="code-block font-mono">
+              <pre><code>(require '[honey.sql :as sql]'[honey.sql.helpers :as h])
+<span class="comment">;; Clojureデータ構造でクエリを定義</span>
+(def q (-> (h/select :id :name)
+           (h/from :users)
+           (h/where [:= :id 1])))
+<span class="comment">;; SQL文字列とパラメータに変換</span>
+(sql/format q)
+<span class="comment">;; => ["SELECT id, name FROM users WHERE id = ?" 1]</span></code></pre>
+            </div>
+          </div>
+        </div>
 
-;; IDによるユーザー取得
-(db/select-one User :id 1)
+        <div class="card">
+          <div class="p-6 card-content">
+            <h3 class="text-2xl font-bold mb-2">HugSQL</h3>
+            <span class="tag mb-4">SQLクエリ分離</span>
+            <p class="text-stone-600 mb-4">SQLをコードから分離し、`.sql`ファイルに記述することを推奨するライブラリ。SQLを第一級市民として扱い、Clojureコードをクリーンに保ちます。
+            </p>
+            <h4 class="font-bold mb-2">主な特徴:</h4>
+            <ul class="list-disc list-inside text-stone-600 mb-4">
+              <li>SQLとロジックの明確な分離</li>
+              <li>DBAやSQLに詳しいチームメンバーとの協業が容易</li>
+              <li>プレーンなSQLをそのまま書け、ツールサポートを受けやすい</li>
+            </ul>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="code-block font-mono">
+              <pre><code><span class="comment">;; --- In user_queries.sql ---</span>
+-- :name find-user-by-id :? :1
+SELECT * FROM users WHERE id = :id;
+<span class="comment">;; --- In Clojure code ---</span>
+(require '[hugsql.core :as hugsql])
+<span class="comment">;; SQLファイルから関数を定義</span>
+(hugsql/def-db-fns "path/to/user_queries.sql")
+<span class="comment">;; 生成された関数を呼び出す</span>
+(find-user-by-id ds {:id 1})</code></pre>
+            </div>
+          </div>
+        </div>
 
-;; 新規ユーザーの挿入
-(db/insert! User {:first_name "Cam"})</code></pre>
+        <div class="card">
+          <div class="p-6 card-content">
+            <h3 class="text-2xl font-bold mb-2">Toucan</h3>
+            <span class="tag mb-4">ORM的アプローチ</span>
+            <p class="text-stone-600 mb-4">RailsのActiveRecordに影響を受けた、軽量なORM風ライブラリ。モデルを定義し、高レベルなAPIでCRUD操作を簡潔に記述できます。</p>
+            <h4 class="font-bold mb-2">主な特徴:</h4>
+            <ul class="list-disc list-inside text-stone-600 mb-4">
+              <li>規約に基づいたシンプルなAPI</li>
+              <li>フックやリレーションシップなどの高度な機能</li>
+              <li>定型的なCRUD操作のコード量を削減</li>
+            </ul>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="code-block font-mono">
+              <pre><code>(require '[toucan.db :as db]'[toucan.models :as models])
+<span class="comment">;; モデルの定義</span>
+(models/defmodel User :users)
+<span class="comment">;; next.jdbcのデータソースを設定</span>
+(db/set-default-db-connection! ds)
+<span class="comment">;; CRUD操作</span>
+(db/insert! User {:id 2 :name "Carol"})
+(db/select-one User :id 2)
+<span class="comment">;; => {:id 2, :name "Carol"}</span></code></pre>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="stack" class="mb-20">
+    <div class="section-divider"></div>
+
+    <section id="datalog-stack" class="mb-20">
       <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold tracking-tight text-stone-900">推奨技術スタック</h2>
+        <h2 class="text-3xl font-bold tracking-tight text-stone-900">Datalogデータベース 詳細解説</h2>
         <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">
-          現代のClojureアプリケーションでは、責務ごとに特化したライブラリを組み合わせるモジュール型アプローチがベストプラクティスです。</p>
+          Clojureのイミュータブルな思想をデータベースにまで拡張する、強力な選択肢。宣言的なDatalogクエリで、複雑なデータ関係をシンプルに扱います。</p>
       </div>
-      <div class="relative max-w-2xl mx-auto p-8">
-        <div class="absolute top-1/2 left-8 right-8 h-1 bg-stone-200"></div>
-        <div class="relative flex justify-between items-center">
-          <div class="text-center group">
-            <div
-              class="w-24 h-24 mx-auto bg-white border-4 border-teal-500 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm shadow-lg transition-transform group-hover:scale-110">
-              接続/実行</div>
-            <p class="mt-2 font-bold">next.jdbc</p>
+
+      <div class="grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div class="card">
+          <div class="p-6 card-content">
+            <h3 class="text-2xl font-bold mb-2">Datomic</h3>
+            <span class="tag mb-4">イミュータブルDB</span>
+            <p class="text-stone-600 mb-4">Clojureの作者による、不変の事実を積み重ねるデータベース。データの完全な履歴が保持され、「時間旅行」クエリが可能です。</p>
+            <h4 class="font-bold mb-2">主な用途:</h4>
+            <ul class="list-disc list-inside text-stone-600 mb-4">
+              <li>監査証跡、履歴分析</li>
+              <li>複雑なビジネスドメインのモデル化</li>
+              <li>データの整合性が最重要となるシステム</li>
+            </ul>
           </div>
-          <div class="text-center group">
-            <div
-              class="w-24 h-24 mx-auto bg-white border-4 border-teal-500 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm shadow-lg transition-transform group-hover:scale-110">
-              クエリ構築</div>
-            <p class="mt-2 font-bold">HoneySQL / HugSQL</p>
+          <div class="p-6 pt-0">
+            <div class="code-block font-mono">
+              <pre><code>(require '[datomic.client.api :as d])
+<span class="comment">;; 接続とトランザクション</span>
+(def client (d/client {:server-type :dev-local :system "dev"}))
+(d/create-database client {:db-name "movies"})
+(def conn (d/connect client {:db-name "movies"}))
+(d/transact conn {:tx-data [{:movie/title "The Matrix"}]})
+<span class="comment">;; Datalogクエリ</span>
+(d/q '[:find ?title :where [_ :movie/title ?title]] (d/db conn))
+<span class="comment">;; => [["The Matrix"]]</span></code></pre>
+            </div>
           </div>
-          <div class="text-center group">
-            <div
-              class="w-24 h-24 mx-auto bg-white border-4 border-teal-500 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm shadow-lg transition-transform group-hover:scale-110">
-              スキーマ管理</div>
-            <p class="mt-2 font-bold">Migratus</p>
+        </div>
+
+        <div class="card">
+          <div class="p-6 card-content">
+            <h3 class="text-2xl font-bold mb-2">XTDB</h3>
+            <span class="tag mb-4">バイテンポラルDB</span>
+            <p class="text-stone-600 mb-4">オープンソースのイミュータブルDB。「システム時間」と「有効時間」を区別するバイテンポラリティが最大の特徴です。</p>
+            <h4 class="font-bold mb-2">主な用途:</h4>
+            <ul class="list-disc list-inside text-stone-600 mb-4">
+              <li>契約管理など、過去・未来の事実を扱うシステム</li>
+              <li>ドキュメント指向のデータモデル</li>
+              <li>既存のSQL DB等をバックエンドとして利用</li>
+            </ul>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="code-block font-mono">
+              <pre><code>(require '[xtdb.api :as xt])
+<span class="comment">;; ノード起動とトランザクション</span>
+(def node (xt/start-node {}))
+(xt/submit-tx node
+  [[:xtdb.api/put {:xt/id :user/alice
+                   :name "Alice"
+                   :db/valid-time #inst "2024-01-01"}]])
+(xt/sync node)
+<span class="comment">;; Datalogクエリ</span>
+(xt/q (xt/db node)
+  '{:find [?name] :where [[?e :name ?name]]})
+<span class="comment">;; => #{["Alice"]}</span></code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="p-6 card-content">
+            <h3 class="text-2xl font-bold mb-2">Datascript</h3>
+            <span class="tag mb-4">インメモリDatalog</span>
+            <p class="text-stone-600 mb-4">ブラウザやJVMで動作する軽量なDatalogエンジン。特にClojureScriptでのクライアントサイド状態管理に革命をもたらしました。</p>
+            <h4 class="font-bold mb-2">主な用途:</h4>
+            <ul class="list-disc list-inside text-stone-600 mb-4">
+              <li>ClojureScript (re-frame等) での高度な状態管理</li>
+              <li>高速なインメモリでのデータ操作・クエリ</li>
+              <li>サーバーレス環境での利用</li>
+            </ul>
+          </div>
+          <div class="p-6 pt-0">
+            <div class="code-block font-mono">
+              <pre><code>(require '[datascript.core :as ds])
+<span class="comment">;; DB作成とトランザクション</span>
+(def conn (ds/create-conn {:task/title {:db/unique :db.unique/identity}}))
+(ds/transact! conn [{:task/title "Learn Datascript"}])
+<span class="comment">;; Datalogクエリ</span>
+(ds/q '[:find ?title :where [_ :task/title ?title]] @conn)
+<span class="comment">;; => #{["Learn Datascript"]}</span></code></pre>
+            </div>
           </div>
         </div>
       </div>
     </section>
+
+    <div class="section-divider"></div>
 
     <section id="popularity" class="mb-20">
       <div class="text-center mb-12">
@@ -224,55 +379,6 @@ SELECT * FROM users WHERE id = :id;</code></pre>
       <div class="card p-6 md:p-8">
         <div class="chart-container">
           <canvas id="popularityChart"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <section id="datalog" class="mb-20">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold tracking-tight text-stone-900">もう一つの選択肢：Datalog</h2>
-        <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">
-          Clojureの思想と究極的に親和性が高いのが、宣言的なクエリ言語Datalogと、それを採用するイミュータブルデータベースです。</p>
-      </div>
-      <div class="overflow-x-auto">
-        <div class="card p-2 sm:p-4">
-          <table class="min-w-full divide-y divide-stone-200">
-            <thead class="bg-stone-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">特徴</th>
-                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Datomic</th>
-                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">XTDB</th>
-                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Datascript
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-stone-200">
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap font-medium">主な用途</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">監査証跡、履歴クエリ</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">バイテンポラル、ドキュメント指向</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">ClojureScript状態管理</td>
-              </tr>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap font-medium">ホスティング</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">AWS, On-Prem</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">自己ホスト (JDBC, Kafka)</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">インメモリ (JVM/JS)</td>
-              </tr>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap font-medium">時間モデル</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">Unitemporal (システム時間)</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">Bitemporal (システム + 有効時間)</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">なし (スナップショット)</td>
-              </tr>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap font-medium">ライセンス</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">無料</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">Apache 2.0</td>
-                <td class="px-6 py-4 whitespace-nowrap text-stone-600">EPL 1.0</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </section>
@@ -397,7 +503,7 @@ SELECT * FROM users WHERE id = :id;</code></pre>
             });
           }
         });
-      }, { rootMargin: `-${headerHeight}px 0px 0px 0px`, threshold: 0.3 });
+      }, { rootMargin: `-${headerHeight}px 0px 0px 0px`, threshold: 0.1 });
 
       sections.forEach(section => {
         observer.observe(section);
