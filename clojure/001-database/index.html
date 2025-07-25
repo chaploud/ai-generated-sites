@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>インタラクティブ Clojure データベース技術スタックガイド</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <!-- Chosen Palette: Warm Harmony (A warm, neutral palette of beige and slate, with a calming teal accent for interactive elements, creating a focused and supportive feel.) -->
+  <!-- Application Structure Plan: A single-page, vertical-scrolling application with a sticky top navigation bar. This non-linear structure empowers users to freely explore topics of interest—such as comparing SQL approaches or viewing library popularity—which is more effective for synthesis and learning than the original report's linear format. The designed structure prioritizes user-driven discovery through key sections: an interactive library dashboard, a side-by-side philosophy comparison, a visual model of the recommended technology stack, and clear, digestible cards for best practices. This architecture transforms the static report into a dynamic educational tool. -->
+  <!-- Visualization & Content Choices: Report Info: Library Popularity Table -> Goal: Compare library popularity quickly -> Viz: Interactive Bar Chart (Chart.js) -> Interaction: Hover tooltips with details -> Justification: A chart is far more intuitive and faster to parse for comparison than a table. | Report Info: Recommended Stack Layers -> Goal: Explain the modular architecture -> Viz: A custom diagram built with styled HTML/CSS -> Interaction: Hover effects to highlight layers -> Justification: Visually represents the layered, modular nature of the stack, a key concept in the report. | Report Info: ORM vs. SQL Comparison -> Goal: Contrast the two philosophies -> Viz: Two-column layout with code blocks -> Interaction: None needed, direct side-by-side view is effective -> Justification: Aids understanding of trade-offs. | Report Info: Datalog DBs Comparison -> Goal: Compare Datalog options -> Viz: Enhanced HTML table with icons -> Justification: Improves scannability and visual appeal. -->
+  <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background-color: #F5F5F4;
+      /* stone-100 */
+      color: #292524;
+      /* stone-800 */
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-weight: 700;
+    }
+
+    .font-mono {
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 350px;
+      max-height: 400px;
+    }
+
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 450px;
+        max-height: 500px;
+      }
+    }
+
+    .nav-link {
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: #14B8A6;
+      /* teal-500 */
+      border-bottom-color: #14B8A6;
+    }
+
+    .card {
+      background-color: #FFFFFF;
+      border: 1px solid #E7E5E4;
+      /* stone-200 */
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+    }
+
+    .tag {
+      background-color: #CCFBF1;
+      /* teal-100 */
+      color: #0F766E;
+      /* teal-700 */
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .code-block {
+      background-color: #1C1917;
+      /* stone-900 */
+      color: #E7E5E4;
+      /* stone-200 */
+      border-radius: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+
+<body class="antialiased">
+
+  <header id="header" class="bg-stone-100/80 backdrop-blur-lg sticky top-0 z-50 border-b border-stone-200">
+    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-bold text-stone-900">Clojure DB Guide</h1>
+        </div>
+        <div class="hidden md:block">
+          <div id="nav-links" class="ml-10 flex items-baseline space-x-4">
+            <a href="#philosophy" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">哲学</a>
+            <a href="#comparison"
+              class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">アプローチ比較</a>
+            <a href="#stack" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">推奨スタック</a>
+            <a href="#popularity" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">人気度</a>
+            <a href="#datalog" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">Datalog</a>
+            <a href="#practices" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">実践</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+    <section id="philosophy" class="mb-20 text-center">
+      <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-stone-900 mb-4">データ中心の哲学</h2>
+      <p class="max-w-3xl mx-auto text-lg text-stone-600">
+        Clojureの世界では、データベースはアプリケーションの自然な延長です。オブジェクトとリレーショナルの「インピーダンスミスマッチ」は存在しません。なぜなら、すべてがデータだからです。このガイドでは、その哲学に基づいた最新のデータベース操作技術を探求します。
+      </p>
+    </section>
+
+    <section id="comparison" class="mb-20">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold tracking-tight text-stone-900">アプローチ比較：ORM vs SQL中心</h2>
+        <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">
+          Clojureでは、SQLを直接的かつ表現力豊かに扱うアプローチが主流です。ORM的な利便性を提供するライブラリも存在しますが、その思想は異なります。</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="card p-6">
+          <h3 class="text-2xl font-bold mb-4">SQL中心アプローチ</h3>
+          <p class="text-stone-600 mb-6">
+            クエリをClojureのデータ構造として扱うことで、プログラムによる構築、合成、変換を可能にします。透明性と制御性が高く、Clojureの関数型パラダイムと非常に親和性が高いです。</p>
+          <div class="space-y-2 mb-4">
+            <span class="tag">HoneySQL</span>
+            <span class="tag">HugSQL</span>
+          </div>
+          <div class="code-block font-mono">
+            <pre><code>;; HoneySQL: クエリをデータとして表現
+{:select [:id :name]
+ :from [:users]
+ :where [:> :signup_date "2024-01-01"]}
+
+;; HugSQL: SQLファイルから関数を生成
+-- :name get-user-by-id :? :1
+SELECT * FROM users WHERE id = :id;</code></pre>
+          </div>
+        </div>
+        <div class="card p-6">
+          <h3 class="text-2xl font-bold mb-4">ORM的アプローチ</h3>
+          <p class="text-stone-600 mb-6">
+            モデルを定義し、高レベルなAPIでCRUD操作を簡略化します。Clojureでは主流ではありませんが、`Toucan`のようなライブラリがこの利便性を提供します。</p>
+          <div class="space-y-2 mb-4">
+            <span class="tag">Toucan</span>
+          </div>
+          <div class="code-block font-mono">
+            <pre><code>;; Toucan: モデル中心の操作
+(defmodel User :user)
+
+;; IDによるユーザー取得
+(db/select-one User :id 1)
+
+;; 新規ユーザーの挿入
+(db/insert! User {:first_name "Cam"})</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack" class="mb-20">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold tracking-tight text-stone-900">推奨技術スタック</h2>
+        <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">
+          現代のClojureアプリケーションでは、責務ごとに特化したライブラリを組み合わせるモジュール型アプローチがベストプラクティスです。</p>
+      </div>
+      <div class="relative max-w-2xl mx-auto p-8">
+        <div class="absolute top-1/2 left-8 right-8 h-1 bg-stone-200"></div>
+        <div class="relative flex justify-between items-center">
+          <div class="text-center group">
+            <div
+              class="w-24 h-24 mx-auto bg-white border-4 border-teal-500 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm shadow-lg transition-transform group-hover:scale-110">
+              接続/実行</div>
+            <p class="mt-2 font-bold">next.jdbc</p>
+          </div>
+          <div class="text-center group">
+            <div
+              class="w-24 h-24 mx-auto bg-white border-4 border-teal-500 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm shadow-lg transition-transform group-hover:scale-110">
+              クエリ構築</div>
+            <p class="mt-2 font-bold">HoneySQL / HugSQL</p>
+          </div>
+          <div class="text-center group">
+            <div
+              class="w-24 h-24 mx-auto bg-white border-4 border-teal-500 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm shadow-lg transition-transform group-hover:scale-110">
+              スキーマ管理</div>
+            <p class="mt-2 font-bold">Migratus</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="popularity" class="mb-20">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold tracking-tight text-stone-900">ライブラリ人気度ダッシュボード</h2>
+        <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">
+          コミュニティでどのライブラリが支持されているかを、GitHubのスター数に基づいて可視化します。これは技術選定の重要な指標の一つです。</p>
+      </div>
+      <div class="card p-6 md:p-8">
+        <div class="chart-container">
+          <canvas id="popularityChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="datalog" class="mb-20">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold tracking-tight text-stone-900">もう一つの選択肢：Datalog</h2>
+        <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">
+          Clojureの思想と究極的に親和性が高いのが、宣言的なクエリ言語Datalogと、それを採用するイミュータブルデータベースです。</p>
+      </div>
+      <div class="overflow-x-auto">
+        <div class="card p-2 sm:p-4">
+          <table class="min-w-full divide-y divide-stone-200">
+            <thead class="bg-stone-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">特徴</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Datomic</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">XTDB</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Datascript
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-stone-200">
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-medium">主な用途</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">監査証跡、履歴クエリ</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">バイテンポラル、ドキュメント指向</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">ClojureScript状態管理</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-medium">ホスティング</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">AWS, On-Prem</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">自己ホスト (JDBC, Kafka)</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">インメモリ (JVM/JS)</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-medium">時間モデル</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">Unitemporal (システム時間)</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">Bitemporal (システム + 有効時間)</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">なし (スナップショット)</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap font-medium">ライセンス</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">無料</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">Apache 2.0</td>
+                <td class="px-6 py-4 whitespace-nowrap text-stone-600">EPL 1.0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="practices" class="mb-20">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold tracking-tight text-stone-900">管理と保守のためのベストプラクティス</h2>
+        <p class="mt-4 max-w-2xl mx-auto text-md text-stone-600">堅牢なアプリケーションを支える、スキーマ管理とテストに関するClojure流のアプローチです。</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="card p-6">
+          <h3 class="text-xl font-bold mb-3">スキーママイグレーション</h3>
+          <p class="text-stone-600">`Migratus`を使い、タイムスタンプベースのIDでマイグレーションを管理。CI/CDパイプラインに組み込み、デプロイとスキーマの同期を自動化します。</p>
+        </div>
+        <div class="card p-6">
+          <h3 class="text-xl font-bold mb-3">テスト戦略</h3>
+          <p class="text-stone-600">高速な単体テストにはインメモリDBとトランザクションロールバックを、信頼性の高いE2Eテストには`Testcontainers`で本番同等のDBコンテナを利用します。
+          </p>
+        </div>
+        <div class="card p-6">
+          <h3 class="text-xl font-bold mb-3">アーキテクチャ</h3>
+          <p class="text-stone-600">「関数的なコア、命令的なシェル」パターンを採用。副作用（DB操作）をシステムの境界に分離し、ビジネスロジックを純粋な関数として記述します。</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-stone-800 text-stone-300">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+      <p>このインタラクティブガイドは、Clojureデータベース技術スタック調査レポートに基づいて作成されました。</p>
+    </div>
+  </footer>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const chartData = {
+        labels: ['Datascript', 'XTDB', 'HoneySQL', 'HugSQL', 'next.jdbc', 'Migratus', 'Toucan'],
+        stars: [5600, 2700, 2100, 1100, 800, 600, 570]
+      };
+
+      const ctx = document.getElementById('popularityChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            label: 'GitHub Stars',
+            data: chartData.stars,
+            backgroundColor: 'rgba(20, 184, 166, 0.6)', // teal-500 with opacity
+            borderColor: 'rgba(15, 118, 110, 1)', // teal-700
+            borderWidth: 1,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(231, 229, 228, 0.1)' // stone-300 with opacity
+              },
+              ticks: {
+                color: '#57534E' // stone-600
+              }
+            },
+            y: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#292524' // stone-800
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: '#1C1917', // stone-900
+              titleFont: {
+                size: 14,
+                weight: 'bold'
+              },
+              bodyFont: {
+                size: 12
+              },
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.parsed.x !== null) {
+                    label += new Intl.NumberFormat('ja-JP').format(context.parsed.x);
+                  }
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('#nav-links a');
+      const headerHeight = document.getElementById('header').offsetHeight;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            navLinks.forEach(link => {
+              link.classList.remove('active');
+              if (link.getAttribute('href').substring(1) === entry.target.id) {
+                link.classList.add('active');
+              }
+            });
+          }
+        });
+      }, { rootMargin: `-${headerHeight}px 0px 0px 0px`, threshold: 0.3 });
+
+      sections.forEach(section => {
+        observer.observe(section);
+      });
+    });
+  </script>
+
+</body>
+
+</html>
