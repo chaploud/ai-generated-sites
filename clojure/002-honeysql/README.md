@@ -2,6 +2,10 @@
 
 HoneySQL 2.xを使ってPostgreSQLクエリを構築するための日本語学習教材です。基本的なSELECT文から高度な再帰クエリ、PostgreSQL固有機能まで、段階的に学習できるように構成されています。
 
+## リンク
+
+- [保守性の高いSQLコンポーネント戦略](14-dop-component.pdf)
+
 ## 📚 学習コース
 
 ### 基礎編 - データ取得（READ）
@@ -203,7 +207,7 @@ HoneySQL 2.xを使ってPostgreSQLクエリを構築するための日本語学�
     (h/from :table)
     sql/format)
 
-;; キーワードマップアプローチ  
+;; キーワードマップアプローチ
 (sql/format {:select [:column]
              :from   [:table]})
 
@@ -233,38 +237,38 @@ HoneySQLには2つの記述方法があります：
 
 ### よく使う関数
 
-| 機能 | ヘルパー関数 | キーワード |
-|------|-------------|-----------|
-| **SELECT系** |
-| 選択 | `h/select` | `:select` |
-| テーブル指定 | `h/from` | `:from` |
-| 条件 | `h/where` | `:where` |
-| 結合 | `h/join` | `:join` |
-| グループ化 | `h/group-by` | `:group-by` |
-| 並び順 | `h/order-by` | `:order-by` |
-| 制限 | `h/limit` | `:limit` |
-| **CRUD系** |
-| 挿入 | `h/insert-into` | `:insert-into` |
-| 更新 | `h/update` | `:update` |
-| 削除 | `h/delete-from` | `:delete-from` |
-| 値設定 | `h/values` | `:values` |
-| フィールド設定 | `h/set` | `:set` |
-| 戻り値 | `h/returning` | `:returning` |
-| **DDL系** |
-| テーブル作成 | `h/create-table` | `:create-table` |
+| 機能             | ヘルパー関数     | キーワード      |
+| ---------------- | ---------------- | --------------- |
+| **SELECT系**     |
+| 選択             | `h/select`       | `:select`       |
+| テーブル指定     | `h/from`         | `:from`         |
+| 条件             | `h/where`        | `:where`        |
+| 結合             | `h/join`         | `:join`         |
+| グループ化       | `h/group-by`     | `:group-by`     |
+| 並び順           | `h/order-by`     | `:order-by`     |
+| 制限             | `h/limit`        | `:limit`        |
+| **CRUD系**       |
+| 挿入             | `h/insert-into`  | `:insert-into`  |
+| 更新             | `h/update`       | `:update`       |
+| 削除             | `h/delete-from`  | `:delete-from`  |
+| 値設定           | `h/values`       | `:values`       |
+| フィールド設定   | `h/set`          | `:set`          |
+| 戻り値           | `h/returning`    | `:returning`    |
+| **DDL系**        |
+| テーブル作成     | `h/create-table` | `:create-table` |
 | インデックス作成 | `h/create-index` | `:create-index` |
-| テーブル変更 | `h/alter-table` | `:alter-table` |
-| 削除 | `h/drop-table` | `:drop-table` |
+| テーブル変更     | `h/alter-table`  | `:alter-table`  |
+| 削除             | `h/drop-table`   | `:drop-table`   |
 
 ### PostgreSQL演算子
 
-| 演算子 | 説明 | 例 |
-|--------|------|-----|
-| `->` | JSON要素取得 | `:data -> "key"` |
-| `->>` | JSONテキスト取得 | `:data ->> "key"` |
-| `@>` | JSON包含 | `:data @> {:key "value"}` |
-| `~` | 正規表現マッチ | `:text ~ "pattern"` |
-| `@>` | 配列包含 | `:tags @> ["tag1"]` |
+| 演算子 | 説明             | 例                        |
+| ------ | ---------------- | ------------------------- |
+| `->`   | JSON要素取得     | `:data -> "key"`          |
+| `->>`  | JSONテキスト取得 | `:data ->> "key"`         |
+| `@>`   | JSON包含         | `:data @> {:key "value"}` |
+| `~`    | 正規表現マッチ   | `:text ~ "pattern"`       |
+| `@>`   | 配列包含         | `:tags @> ["tag1"]`       |
 
 ## 📖 追加リソース
 
