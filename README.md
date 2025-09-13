@@ -18,4 +18,4 @@ AIに調査させた内容をまとめて公開するためのサイトです。
 
 ## Web
 
-- [JavaScriptブラウザAPI包括的学習ガイド](browser-javascript-api.md)
+- [JavaScriptブラウザAPI包括的学習ガイド](web/001-browser-api/README.md)
