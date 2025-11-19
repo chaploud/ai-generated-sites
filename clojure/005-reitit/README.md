@@ -1,5 +1,7 @@
 # Reitit完全ガイド：基礎から実践まで
 
+[reititキーワード集](./01_keywords.md)
+
 ## reitit（ライティット）とは何か
 
 **reitit**は、Clojure/ClojureScript向けの高速でデータ駆動型のルーティングライブラリです。Metosin社が開発し、バックエンド（JVM上のRing）とフロントエンド（ブラウザ上のClojureScript）の両方で動作する統一されたルーティングソリューションを提供します。
@@ -108,7 +110,7 @@
       [["/"]
        {:get handler
         :name ::home}]
-      [["/ping" 
+      [["/ping"
         {:get handler
          :name ::ping}]])))
 
@@ -711,13 +713,13 @@ OpenAPI 3.1.0 は Swagger 2 よりも強化された機能を提供します：
                               {:name "products"
                                :description "商品管理API"}]}
                :handler (openapi/create-openapi-handler)}}]
-       
+
        ["/swagger-ui/*"
         {:get {:no-doc true
                :handler (swagger-ui/create-swagger-ui-handler
                         {:url "/openapi.json"
                          :config {:validator-url nil}})}}]
-       
+
        ["/api"
         ["/users"
          {:tags ["users"]}
@@ -768,7 +770,7 @@ OpenAPI 3.1.0 は Swagger 2 よりも強化された機能を提供します：
                     :responses {204 {}
                                404 {:body [:map [:error :string]]}}
                     :handler delete-user}}]]
-        
+
         ["/products"
          {:tags ["products"]}
          [""
@@ -783,7 +785,7 @@ OpenAPI 3.1.0 は Swagger 2 よりも強化された機能を提供します：
                                                  [:price :int]
                                                  [:category :string]]]}}
                  :handler list-products}}]]]]
-      
+
       {:data {:coercion reitit.coercion.malli/coercion
               :middleware [parameters/parameters-middleware
                           muuntaja/format-middleware
@@ -1444,7 +1446,7 @@ src/
                  (r/match-by-path "/users/123")
                  :path-params
                  :id)))))
-  
+
   (testing "逆方向ルーティング"
     (let [router (r/router routes)]
       (is (= "/users/123"
