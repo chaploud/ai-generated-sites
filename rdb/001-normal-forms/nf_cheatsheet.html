@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #FAFAF9;
+    color: #1C1C1A;
+    padding: 32px 36px;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid #1C1C1A;
+  }
+  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .page-sub { font-size: 11px; color: #6B6B67; margin-top: 2px; }
+  .legend { display: flex; gap: 14px; align-items: center; }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #6B6B67; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── Quick cheatsheet bar ─── */
+  .quick-bar {
+    background: #1C1C1A;
+    color: #F5F4F0;
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .quick-label { font-size: 10px; color: #9C9B95; white-space: nowrap; }
+  .quick-items { display: flex; gap: 6px; flex-wrap: wrap; }
+  .qitem {
+    font-size: 10.5px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .qbadge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+  }
+  .qarrow { color: #6B6B67; font-size: 9px; }
+
+  /* ─── Grid ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  /* BCNF gets full row? No, keep 2-col */
+
+  /* ─── Card ─── */
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    border: 0.75px solid #E2E0D8;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 10px 14px 8px;
+    border-bottom: 0.5px solid #E2E0D8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .card-title { font-size: 12px; font-weight: 700; }
+  .card-rule {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #3A3A38;
+    line-height: 1.4;
+    padding: 8px 14px 4px;
+  }
+  .card-body {
+    padding: 0 14px 12px;
+  }
+
+  /* ─── Section labels ─── */
+  .section-label {
+    font-size: 9.5px;
+    font-weight: 500;
+    color: #9C9B95;
+    margin: 8px 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── Tables ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  th {
+    background: #F5F4F0;
+    font-weight: 600;
+    color: #6B6B67;
+    padding: 3px 7px;
+    border: 0.5px solid #E2E0D8;
+    font-size: 9.5px;
+  }
+  td {
+    padding: 3px 7px;
+    border: 0.5px solid #E2E0D8;
+    color: #1C1C1A;
+  }
+  .bad td { background: #FEF2F2; color: #7F1D1D; }
+  .good td { background: #F0FDF4; color: #14532D; }
+  .hl { font-weight: 600; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+  .split-label { font-size: 9px; color: #9C9B95; margin-bottom: 3px; }
+
+  /* ─── Arrow between tables ─── */
+  .arrow-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 5px 0 3px;
+    font-size: 10px;
+  }
+  .arrow-icon { color: #9C9B95; }
+
+  /* ─── Summary footer ─── */
+  .footer {
+    margin-top: 16px;
+    background: #fff;
+    border-radius: 8px;
+    border: 0.75px solid #E2E0D8;
+    padding: 12px 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .footer-block h4 {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6B6B67;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+  .story-list { list-style: none; }
+  .story-list li {
+    font-size: 10.5px;
+    padding: 2px 0;
+    display: flex;
+    gap: 6px;
+  }
+  .story-list .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    color: #9C9B95;
+    min-width: 18px;
+    padding-top: 1px;
+  }
+  .prac-list { list-style: none; }
+  .prac-list li {
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+  }
+  .prac-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .prac-text { color: #3A3A38; }
+  .prac-note { color: #9C9B95; font-size: 9.5px; }
+</style>
+</head>
+<body>
+
+<!-- ─── Header ─── -->
+<div class="page-header">
+  <div>
+    <div class="page-title">RDB 正規形チートシート</div>
+    <div class="page-sub">1NF → 6NF ── 全形式・展開版</div>
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="dot" style="background:#3B82F6"></div>実務必須</div>
+    <div class="leg"><div class="dot" style="background:#10B981"></div>推奨</div>
+    <div class="leg"><div class="dot" style="background:#F59E0B"></div>稀に有効</div>
+    <div class="leg"><div class="dot" style="background:#9CA3AF"></div>理論・特殊</div>
+  </div>
+</div>
+
+<!-- ─── Quick bar ─── -->
+<div class="quick-bar">
+  <span class="quick-label">10秒記憶</span>
+  <div class="quick-items">
+    <span class="qitem"><span class="qbadge" style="background:#1D4ED8;color:#BFDBFE">1NF</span> バラせ</span>
+    <span class="qarrow">→</span>
+    <span class="qitem"><span class="qbadge" style="background:#1D4ED8;color:#BFDBFE">2NF</span> 部分依存NG</span>
+    <span class="qarrow">→</span>
+    <span class="qitem"><span class="qbadge" style="background:#1D4ED8;color:#BFDBFE">3NF</span> 列依存NG</span>
+    <span class="qarrow">→</span>
+    <span class="qitem"><span class="qbadge" style="background:#065F46;color:#A7F3D0">BCNF</span> 決定項＝キー</span>
+    <span class="qarrow">→</span>
+    <span class="qitem"><span class="qbadge" style="background:#92400E;color:#FDE68A">4NF</span> 独立多値NG</span>
+    <span class="qarrow">→</span>
+    <span class="qitem"><span class="qbadge" style="background:#374151;color:#D1D5DB">5NF</span> JOINで壊れるな</span>
+    <span class="qarrow">→</span>
+    <span class="qitem"><span class="qbadge" style="background:#374151;color:#D1D5DB">6NF</span> 全分解</span>
+  </div>
+</div>
+
+<!-- ─── Cards grid ─── -->
+<div class="grid">
+
+  <!-- 1NF -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge" style="background:#EFF6FF;color:#1D4ED8">1NF</span>
+      <span class="card-title">第1正規形</span>
+    </div>
+    <div class="card-rule">値をバラせ ── セルに複数値を入れるな</div>
+    <div class="card-body">
+      <div class="section-label">❌ 非正規（カンマ区切りで複数値）</div>
+      <table>
+        <tr><th>id</th><th>name</th><th class="hl">tags</th></tr>
+        <tr class="bad"><td>1</td><td>Alice</td><td class="hl">Go, Rust, JS</td></tr>
+        <tr class="bad"><td>2</td><td>Bob</td><td class="hl">Python</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:8px">✅ 1NF適用後（行に展開）</div>
+      <table>
+        <tr><th>id</th><th>name</th><th>tag</th></tr>
+        <tr class="good"><td>1</td><td>Alice</td><td>Go</td></tr>
+        <tr class="good"><td>1</td><td>Alice</td><td>Rust</td></tr>
+        <tr class="good"><td>1</td><td>Alice</td><td>JS</td></tr>
+        <tr class="good"><td>2</td><td>Bob</td><td>Python</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2NF -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge" style="background:#EFF6FF;color:#1D4ED8">2NF</span>
+      <span class="card-title">第2正規形</span>
+    </div>
+    <div class="card-rule">部分依存を消せ ── 複合キーの一部だけに依存するな</div>
+    <div class="card-body">
+      <div class="section-label">❌ 商品名は「商品ID」だけで決まる（部分依存）</div>
+      <table>
+        <tr><th>注文ID</th><th>商品ID</th><th class="hl">商品名</th><th>数量</th></tr>
+        <tr class="bad"><td>1</td><td>A</td><td class="hl">ペン</td><td>3</td></tr>
+        <tr class="bad"><td>2</td><td>A</td><td class="hl">ペン</td><td>1</td></tr>
+        <tr class="bad"><td>2</td><td>B</td><td class="hl">ノート</td><td>2</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:8px">✅ 商品名を別テーブルへ分離</div>
+      <div class="split">
+        <div>
+          <div class="split-label">注文明細</div>
+          <table>
+            <tr><th>注文ID</th><th>商品ID</th><th>数量</th></tr>
+            <tr class="good"><td>1</td><td>A</td><td>3</td></tr>
+            <tr class="good"><td>2</td><td>A</td><td>1</td></tr>
+            <tr class="good"><td>2</td><td>B</td><td>2</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="split-label">商品マスタ</div>
+          <table>
+            <tr><th>商品ID</th><th>商品名</th></tr>
+            <tr class="good"><td>A</td><td>ペン</td></tr>
+            <tr class="good"><td>B</td><td>ノート</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3NF -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge" style="background:#EFF6FF;color:#1D4ED8">3NF</span>
+      <span class="card-title">第3正規形</span>
+    </div>
+    <div class="card-rule">推移依存を消せ ── 列が列を決めるな</div>
+    <div class="card-body">
+      <div class="section-label">❌ 社員ID → 部署ID → 部署名（連鎖依存）</div>
+      <table>
+        <tr><th>社員ID</th><th>部署ID</th><th class="hl">部署名</th></tr>
+        <tr class="bad"><td>101</td><td>D1</td><td class="hl">開発部</td></tr>
+        <tr class="bad"><td>102</td><td>D1</td><td class="hl">開発部</td></tr>
+        <tr class="bad"><td>103</td><td>D2</td><td class="hl">営業部</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:8px">✅ 部署名を別テーブルへ</div>
+      <div class="split">
+        <div>
+          <div class="split-label">社員</div>
+          <table>
+            <tr><th>社員ID</th><th>部署ID</th></tr>
+            <tr class="good"><td>101</td><td>D1</td></tr>
+            <tr class="good"><td>102</td><td>D1</td></tr>
+            <tr class="good"><td>103</td><td>D2</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="split-label">部署</div>
+          <table>
+            <tr><th>部署ID</th><th>部署名</th></tr>
+            <tr class="good"><td>D1</td><td>開発部</td></tr>
+            <tr class="good"><td>D2</td><td>営業部</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BCNF -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge" style="background:#ECFDF5;color:#065F46">BCNF</span>
+      <span class="card-title">ボイスコッド正規形</span>
+    </div>
+    <div class="card-rule">決定項＝キーにしろ ── 3NFの例外も許さない</div>
+    <div class="card-body">
+      <div class="section-label">❌ 講師→科目 だが「講師」は非キー（BCNF違反）</div>
+      <table>
+        <tr><th>学生</th><th class="hl">講師</th><th>科目</th></tr>
+        <tr class="bad"><td>田中</td><td class="hl">鈴木先生</td><td>数学</td></tr>
+        <tr class="bad"><td>佐藤</td><td class="hl">鈴木先生</td><td>数学</td></tr>
+        <tr class="bad"><td>田中</td><td class="hl">山田先生</td><td>英語</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:8px">✅ 講師→科目 の依存を別テーブルへ</div>
+      <div class="split">
+        <div>
+          <div class="split-label">受講</div>
+          <table>
+            <tr><th>学生</th><th>講師ID</th></tr>
+            <tr class="good"><td>田中</td><td>T1</td></tr>
+            <tr class="good"><td>佐藤</td><td>T1</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="split-label">講師マスタ</div>
+          <table>
+            <tr><th>講師ID</th><th>名前</th><th>科目</th></tr>
+            <tr class="good"><td>T1</td><td>鈴木</td><td>数学</td></tr>
+            <tr class="good"><td>T2</td><td>山田</td><td>英語</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4NF -->
+  <div class="card">
+    <div class="card-header">
+      <span class="badge" style="background:#FFFBEB;color:#92400E">4NF</span>
+      <span class="card-title">第4正規形</span>
+    </div>
+    <div class="card-rule">独立な多値を混ぜるな ── 直積爆発を防げ</div>
+    <div class="card-body">
+      <div class="section-label">❌ 趣味とスキルは独立なのに同じテーブル → 直積で爆発</div>
+      <table>
+        <tr><th>user</th><th class="hl">hobby</th><th class="hl">skill</th></tr>
+        <tr class="bad"><td>A</td><td class="hl">野球</td><td class="hl">Go</td></tr>
+        <tr class="bad"><td>A</td><td class="hl">野球</td><td class="hl">Rust</td></tr>
+        <tr class="bad"><td>A</td><td class="hl">将棋</td><td class="hl">Go</td></tr>
+        <tr class="bad"><td>A</td><td class="hl">将棋</td><td class="hl">Rust</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:8px">✅ 独立な軸ごとにテーブルを分離</div>
+      <div class="split">
+        <div>
+          <div class="split-label">user_hobby</div>
+          <table>
+            <tr><th>user</th><th>hobby</th></tr>
+            <tr class="good"><td>A</td><td>野球</td></tr>
+            <tr class="good"><td>A</td><td>将棋</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="split-label">user_skill</div>
+          <table>
+            <tr><th>user</th><th>skill</th></tr>
+            <tr class="good"><td>A</td><td>Go</td></tr>
+            <tr class="good"><td>A</td><td>Rust</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5NF + 6NF -->
+  <div class="card">
+    <div class="card-header" style="gap:8px">
+      <span class="badge" style="background:#F3F4F6;color:#374151">5NF</span>
+      <span class="card-title">第5正規形</span>
+      <span style="color:#D1D5DB;margin:0 2px">/</span>
+      <span class="badge" style="background:#F3F4F6;color:#374151">6NF</span>
+      <span class="card-title">第6正規形</span>
+    </div>
+    <div class="card-rule">5NF：分解しても正しく戻せ　6NF：全部バラせ（時間含む）</div>
+    <div class="card-body">
+      <div class="section-label">5NF ── JOIN依存の排除</div>
+      <table>
+        <tr><th>概念</th><th>内容</th></tr>
+        <tr><td>問題</td><td>3テーブルに分解→JOIN→余計な行が生まれる</td></tr>
+        <tr><td>条件</td><td>すべての結合依存がキーで生成される</td></tr>
+        <tr><td>実務</td><td>ほぼ意識することはない（理論寄り）</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:8px">6NF ── 列単位分解 ＋ 時間変化の管理</div>
+      <table>
+        <tr><th>社員ID</th><th>属性</th><th>値</th><th>valid_from</th></tr>
+        <tr class="good"><td>101</td><td>部署</td><td>開発部</td><td>2024-01</td></tr>
+        <tr class="good"><td>101</td><td>部署</td><td>営業部</td><td>2025-03</td></tr>
+        <tr class="good"><td>101</td><td>役職</td><td>主任</td><td>2025-03</td></tr>
+      </table>
+      <div class="section-label" style="margin-top:6px">6NF適用場面</div>
+      <table>
+        <tr><td>時系列DB・監査ログ・Temporal Table（SQL:2011）・Datomic的設計</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Footer summary ─── -->
+<div class="footer">
+  <div class="footer-block">
+    <h4>ストーリーで覚える</h4>
+    <ul class="story-list">
+      <li><span class="num">1NF</span> まず表にする（配列NG）</li>
+      <li><span class="num">2NF</span> 中途半端な依存を消す</li>
+      <li><span class="num">3NF</span> 横の連鎖依存を消す</li>
+      <li><span class="num">BCNF</span> 例外も許さない（全決定項→キー）</li>
+      <li><span class="num">4NF</span> 独立リストの掛け算を防ぐ</li>
+      <li><span class="num">5NF</span> JOINで壊れないようにする</li>
+      <li><span class="num">6NF</span> 全部バラして時間も扱う</li>
+    </ul>
+  </div>
+
+  <div class="footer-block">
+    <h4>実務での優先度</h4>
+    <ul class="prac-list">
+      <li><div class="prac-dot" style="background:#3B82F6"></div><span class="prac-text">1〜3NF</span><span class="prac-note">── 必須。設計の基本</span></li>
+      <li><div class="prac-dot" style="background:#10B981"></div><span class="prac-text">BCNF</span><span class="prac-note">── やると綺麗（JOIN増注意）</span></li>
+      <li><div class="prac-dot" style="background:#F59E0B"></div><span class="prac-text">4NF</span><span class="prac-note">── タグ・属性系で稀に重要</span></li>
+      <li><div class="prac-dot" style="background:#9CA3AF"></div><span class="prac-text">5NF</span><span class="prac-note">── ほぼ出ない</span></li>
+      <li><div class="prac-dot" style="background:#9CA3AF"></div><span class="prac-text">6NF</span><span class="prac-note">── 時系列DB・監査ログ系</span></li>
+    </ul>
+  </div>
+
+  <div class="footer-block">
+    <h4>Clojure / データ志向的に言うと</h4>
+    <ul class="story-list">
+      <li><span class="num">1NF</span> ネスト排除・構造の正規化</li>
+      <li><span class="num">2NF</span> keyに対する依存の純化</li>
+      <li><span class="num">3NF</span> 依存グラフのスター化</li>
+      <li><span class="num">BCNF</span> 依存の左辺をキーに限定</li>
+      <li><span class="num">4NF</span> 独立な集合を分離（直積回避）</li>
+      <li><span class="num">5NF</span> joinが情報を歪めない保証</li>
+      <li><span class="num">6NF</span> 完全immutableな事実分解（Datomic的）</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

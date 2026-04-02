@@ -18,6 +18,10 @@ AIに調査させた内容をまとめて公開するためのサイトです。
 
 - [V8エンジン & Clojure処理系（WebAssembly連携）学習ロードマップ](https://claude.ai/public/artifacts/02f27925-65f9-41ec-bfbc-f7d5e2848776)
 
+## RDB
+
+- [001_RDB正規形チートシート](rdb/001-normal-forms/README.md)
+
 ## Web
 
 - [JavaScriptブラウザAPI包括的学習ガイド](web/001-browser-api/README.md)
