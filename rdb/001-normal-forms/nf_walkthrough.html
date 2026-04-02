@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #FAFAF9;
+    color: #1C1C1A;
+    padding: 32px 36px;
+    font-size: 11px;
+    line-height: 1.6;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid #1C1C1A;
+  }
+  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .page-sub { font-size: 11px; color: #6B6B67; margin-top: 2px; }
+
+  /* ─── Step ─── */
+  .step {
+    margin-bottom: 28px;
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+  .step-title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* ─── Problem / Solution boxes ─── */
+  .problem {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+  }
+  .problem-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #991B1B;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .problem-text {
+    font-size: 11px;
+    color: #7F1D1D;
+    line-height: 1.5;
+  }
+
+  .solution {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+  }
+  .solution-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #166534;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+  }
+  .solution-text {
+    font-size: 11px;
+    color: #14532D;
+    line-height: 1.5;
+  }
+
+  /* ─── Arrow ─── */
+  .arrow {
+    text-align: center;
+    font-size: 18px;
+    color: #9C9B95;
+    margin: 6px 0;
+  }
+
+  /* ─── Tables ─── */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 6px 0;
+  }
+  .table-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: #6B6B67;
+    margin-bottom: 4px;
+  }
+  table {
+    border-collapse: collapse;
+    font-size: 10px;
+    width: 100%;
+  }
+  th {
+    background: #F5F4F0;
+    font-weight: 600;
+    color: #6B6B67;
+    padding: 4px 8px;
+    border: 0.5px solid #E2E0D8;
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+  td {
+    padding: 4px 8px;
+    border: 0.5px solid #E2E0D8;
+    color: #1C1C1A;
+    white-space: nowrap;
+  }
+  .hl { background: #FEF3C7; font-weight: 600; }
+  .bad-row td { background: #FEF2F2; }
+  .good-row td { background: #F0FDF4; }
+  .pk { font-weight: 700; }
+
+  .tables-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 6px 0;
+  }
+  .tables-split-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 6px 0;
+  }
+
+  /* ─── Dep diagram ─── */
+  .dep {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #6B6B67;
+    background: #fff;
+    border: 0.5px solid #E2E0D8;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin: 6px 0;
+    line-height: 1.7;
+  }
+  .dep .bad { color: #DC2626; font-weight: 600; }
+  .dep .good { color: #16A34A; font-weight: 600; }
+
+  /* ─── Divider ─── */
+  .divider {
+    border: none;
+    border-top: 1px dashed #D1D5DB;
+    margin: 24px 0;
+  }
+
+  /* ─── Footer ─── */
+  .footer-note {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: #1C1C1A;
+    color: #F5F4F0;
+    border-radius: 8px;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .footer-note strong { color: #FDE68A; }
+</style>
+</head>
+<body>
+
+<!-- ─── Header ─── -->
+<div class="page-header">
+  <div class="page-title">1つのテーブルから始める正規化ウォークスルー</div>
+  <div class="page-sub">非正規 → 1NF → 2NF → 3NF → BCNF → 4NF ── 同じデータを段階的に正規化していく</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- STEP 0: 非正規 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num" style="background:#FEE2E2;color:#991B1B">STEP 0</span>
+    <span class="step-title">出発点 ── 全部入りの非正規テーブル</span>
+  </div>
+
+  <p style="font-size:11px;color:#3A3A38;margin-bottom:8px">
+    ある会社の「社員研修管理」をイメージしてください。<br>
+    担当者は会社の社員で、研修には講師がいて、講師は専門科目を持ちます。社員にはスキルと趣味が複数あります。
+  </p>
+
+  <div class="table-wrap">
+    <div class="table-title">研修管理テーブル（非正規）</div>
+    <table>
+      <tr>
+        <th>社員ID</th><th>社員名</th><th>部署ID</th><th>部署名</th>
+        <th>講師名</th><th>科目</th>
+        <th>成績</th><th>スキル</th><th>趣味</th>
+      </tr>
+      <tr class="bad-row">
+        <td class="pk">101</td><td>田中</td><td>D1</td><td>開発部</td>
+        <td>鈴木先生</td><td>数学</td>
+        <td>A</td><td class="hl">Go, Rust</td><td class="hl">野球, 将棋</td>
+      </tr>
+      <tr class="bad-row">
+        <td class="pk">101</td><td>田中</td><td>D1</td><td>開発部</td>
+        <td>山田先生</td><td>英語</td>
+        <td>B</td><td class="hl">Go, Rust</td><td class="hl">野球, 将棋</td>
+      </tr>
+      <tr class="bad-row">
+        <td class="pk">102</td><td>佐藤</td><td>D2</td><td>営業部</td>
+        <td>鈴木先生</td><td>数学</td>
+        <td>A</td><td class="hl">Python</td><td class="hl">読書</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="problem">
+    <div class="problem-label">何がまずい？</div>
+    <div class="problem-text">
+      あらゆる問題がここに詰まっている：カンマ区切りの複数値、重複データ、連鎖的な依存関係…<br>
+      これを1つずつ解消していきます。
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- STEP 1: 1NF -->
+<!-- ════════════════════════════════════════════ -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num" style="background:#DBEAFE;color:#1D4ED8">1NF</span>
+    <span class="step-title">値をバラせ ── 1セルに1値</span>
+  </div>
+
+  <div class="problem">
+    <div class="problem-label">問題：セルに複数値</div>
+    <div class="problem-text">
+      「スキル」「趣味」列にカンマ区切りで複数値が入っている。<br>
+      → WHERE skill = 'Go' で検索できない。INDEX も効かない。
+    </div>
+  </div>
+
+  <div class="dep">
+    <span class="bad">スキル = "Go, Rust"</span> → 1セルに複数の意味が混在
+  </div>
+
+  <div class="arrow">↓ 行に展開する</div>
+
+  <div class="table-wrap">
+    <div class="table-title">1NF適用後</div>
+    <table>
+      <tr>
+        <th>社員ID</th><th>社員名</th><th>部署ID</th><th>部署名</th>
+        <th>講師名</th><th>科目</th><th>成績</th><th>スキル</th><th>趣味</th>
+      </tr>
+      <tr class="good-row">
+        <td class="pk">101</td><td>田中</td><td>D1</td><td>開発部</td>
+        <td>鈴木先生</td><td>数学</td><td>A</td><td>Go</td><td>野球</td>
+      </tr>
+      <tr class="good-row">
+        <td class="pk">101</td><td>田中</td><td>D1</td><td>開発部</td>
+        <td>鈴木先生</td><td>数学</td><td>A</td><td>Go</td><td>将棋</td>
+      </tr>
+      <tr class="good-row">
+        <td class="pk">101</td><td>田中</td><td>D1</td><td>開発部</td>
+        <td>鈴木先生</td><td>数学</td><td>A</td><td>Rust</td><td>野球</td>
+      </tr>
+      <tr class="good-row">
+        <td class="pk">101</td><td>田中</td><td>D1</td><td>開発部</td>
+        <td>鈴木先生</td><td>数学</td><td>A</td><td>Rust</td><td>将棋</td>
+      </tr>
+      <tr class="good-row"><td colspan="9" style="text-align:center;color:#6B6B67">… 他の行も同様に展開（行数が爆発！）</td></tr>
+    </table>
+  </div>
+
+  <div class="solution">
+    <div class="solution-label">達成</div>
+    <div class="solution-text">全セルがアトミック値になった。ただし行が爆発し、大量の重複が残っている。</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- STEP 2: 2NF -->
+<!-- ════════════════════════════════════════════ -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num" style="background:#DBEAFE;color:#1D4ED8">2NF</span>
+    <span class="step-title">部分依存を消せ ── PKの一部だけで決まる列を分離</span>
+  </div>
+
+  <div class="problem">
+    <div class="problem-label">問題：部分関数従属</div>
+    <div class="problem-text">
+      PK = (社員ID, 講師名, スキル, 趣味) としたとき、<br>
+      「社員名」「部署ID」「部署名」は <strong>社員IDだけ</strong> で決まる。PKの一部にしか依存していない。<br>
+      → 社員名を変更するとき、何十行も更新が必要（更新異常）。
+    </div>
+  </div>
+
+  <div class="dep">
+    PK = (社員ID, 講師名, スキル, 趣味)<br>
+    <span class="bad">社員ID → 社員名, 部署ID, 部署名</span> ← PKの一部だけで決まる（部分依存）<br>
+    <span class="bad">講師名 → 科目</span> ← PKの一部だけで決まる（部分依存）
+  </div>
+
+  <div class="arrow">↓ 部分依存する列を別テーブルへ分離</div>
+
+  <div class="tables-split">
+    <div>
+      <div class="table-title">社員テーブル</div>
+      <table>
+        <tr><th>社員ID (PK)</th><th>社員名</th><th>部署ID</th><th>部署名</th></tr>
+        <tr class="good-row"><td class="pk">101</td><td>田中</td><td>D1</td><td>開発部</td></tr>
+        <tr class="good-row"><td class="pk">102</td><td>佐藤</td><td>D2</td><td>営業部</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">受講テーブル</div>
+      <table>
+        <tr><th>社員ID (PK)</th><th>講師名 (PK)</th><th>成績</th></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">鈴木先生</td><td>A</td></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">山田先生</td><td>B</td></tr>
+        <tr class="good-row"><td class="pk">102</td><td class="pk">鈴木先生</td><td>A</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="tables-split-3">
+    <div>
+      <div class="table-title">講師テーブル</div>
+      <table>
+        <tr><th>講師名 (PK)</th><th>科目</th></tr>
+        <tr class="good-row"><td class="pk">鈴木先生</td><td>数学</td></tr>
+        <tr class="good-row"><td class="pk">山田先生</td><td>英語</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">社員スキル</div>
+      <table>
+        <tr><th>社員ID (PK)</th><th>スキル (PK)</th></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">Go</td></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">Rust</td></tr>
+        <tr class="good-row"><td class="pk">102</td><td class="pk">Python</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">社員趣味</div>
+      <table>
+        <tr><th>社員ID (PK)</th><th>趣味 (PK)</th></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">野球</td></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">将棋</td></tr>
+        <tr class="good-row"><td class="pk">102</td><td class="pk">読書</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="solution">
+    <div class="solution-label">達成</div>
+    <div class="solution-text">すべての非キー列がPK全体に依存するようになった。スキルと趣味の直積爆発も解消。</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- STEP 3: 3NF -->
+<!-- ════════════════════════════════════════════ -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num" style="background:#DBEAFE;color:#1D4ED8">3NF</span>
+    <span class="step-title">推移依存を消せ ── 非キー列が別の非キー列を決めるな</span>
+  </div>
+
+  <div class="problem">
+    <div class="problem-label">問題：推移的関数従属</div>
+    <div class="problem-text">
+      社員テーブルで、社員ID → 部署ID → 部署名 という連鎖がある。<br>
+      「部署名」はPKから直接ではなく、非キー列「部署ID」を経由して決まっている。<br>
+      → 部署名を変更するとき、その部署の全社員の行を更新する必要がある。
+    </div>
+  </div>
+
+  <div class="dep">
+    社員テーブル: PK = 社員ID<br>
+    社員ID → 部署ID → <span class="bad">部署名</span> ← 非キー列(部署ID)が別の非キー列(部署名)を決めている
+  </div>
+
+  <div class="arrow">↓ 推移依存する列を別テーブルへ</div>
+
+  <div class="tables-split">
+    <div>
+      <div class="table-title">社員テーブル（3NF）</div>
+      <table>
+        <tr><th>社員ID (PK)</th><th>社員名</th><th>部署ID (FK)</th></tr>
+        <tr class="good-row"><td class="pk">101</td><td>田中</td><td>D1</td></tr>
+        <tr class="good-row"><td class="pk">102</td><td>佐藤</td><td>D2</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">部署テーブル（新規）</div>
+      <table>
+        <tr><th>部署ID (PK)</th><th>部署名</th></tr>
+        <tr class="good-row"><td class="pk">D1</td><td>開発部</td></tr>
+        <tr class="good-row"><td class="pk">D2</td><td>営業部</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="solution">
+    <div class="solution-label">達成</div>
+    <div class="solution-text">すべての非キー列がPKに直接依存するようになった。部署名の変更は1行だけでOK。</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- STEP 4: BCNF -->
+<!-- ════════════════════════════════════════════ -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num" style="background:#D1FAE5;color:#065F46">BCNF</span>
+    <span class="step-title">決定項＝キーにしろ ── 非キーが何かを決定するな</span>
+  </div>
+
+  <div class="problem">
+    <div class="problem-label">問題：非キーの決定項</div>
+    <div class="problem-text">
+      受講テーブルを見てみましょう。PK = (社員ID, 講師名) ですが、<br>
+      「講師名 → 科目」という依存がもしこのテーブル内にあったら（科目列を含む場合）、<br>
+      講師名は非キー（PKの一部ではあるがスーパーキーではない）なのに他の列を決定している = BCNF違反。<br>
+      ただし 2NF のステップで既に講師テーブルを分離済みなので、<strong>今回は既にBCNFを満たしています</strong>。
+    </div>
+  </div>
+
+  <div class="dep">
+    受講テーブル: PK = (社員ID, 講師名) → 成績 <span class="good">✓ OK</span><br>
+    講師テーブル: PK = 講師名 → 科目 <span class="good">✓ OK（決定項=PK）</span><br><br>
+    <span class="good">すべての決定項がスーパーキーになっている → BCNF達成</span>
+  </div>
+
+  <div class="solution">
+    <div class="solution-label">達成（今回は2NFの分離で自然に満たされた）</div>
+    <div class="solution-text">
+      BCNFは3NFの強化版。「<strong>すべての</strong>関数従属 X → Y において、Xがスーパーキーである」が条件。<br>
+      3NFでは候補キーの一部が決定項になることを許すが、BCNFは許さない。
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- STEP 5: 4NF -->
+<!-- ════════════════════════════════════════════ -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num" style="background:#FEF3C7;color:#92400E">4NF</span>
+    <span class="step-title">独立な多値を混ぜるな ── 直積爆発を防げ</span>
+  </div>
+
+  <div class="problem">
+    <div class="problem-label">問題：もし分離していなかったら？</div>
+    <div class="problem-text">
+      仮にスキルと趣味を1つのテーブルにまとめていたとしましょう。<br>
+      スキルと趣味は互いに独立なのに、同じテーブルにあると直積（掛け算）で行が爆発します。
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-title">❌ もし「社員_スキル_趣味」テーブルがあったら</div>
+    <table>
+      <tr><th>社員ID</th><th class="hl">スキル</th><th class="hl">趣味</th></tr>
+      <tr class="bad-row"><td class="pk">101</td><td class="hl">Go</td><td class="hl">野球</td></tr>
+      <tr class="bad-row"><td class="pk">101</td><td class="hl">Go</td><td class="hl">将棋</td></tr>
+      <tr class="bad-row"><td class="pk">101</td><td class="hl">Rust</td><td class="hl">野球</td></tr>
+      <tr class="bad-row"><td class="pk">101</td><td class="hl">Rust</td><td class="hl">将棋</td></tr>
+    </table>
+  </div>
+
+  <div class="dep">
+    社員ID →→ スキル（社員が持つスキルの集合）<br>
+    社員ID →→ 趣味（社員が持つ趣味の集合）<br>
+    <span class="bad">2つの多値依存が独立 → 直積で行が爆発する（2×2=4行）</span>
+  </div>
+
+  <div class="arrow">↓ 独立な多値ごとにテーブルを分離（2NFで実施済み）</div>
+
+  <div class="tables-split">
+    <div>
+      <div class="table-title">✅ 社員スキル</div>
+      <table>
+        <tr><th>社員ID (PK)</th><th>スキル (PK)</th></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">Go</td></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">Rust</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">✅ 社員趣味</div>
+      <table>
+        <tr><th>社員ID (PK)</th><th>趣味 (PK)</th></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">野球</td></tr>
+        <tr class="good-row"><td class="pk">101</td><td class="pk">将棋</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="solution">
+    <div class="solution-label">達成</div>
+    <div class="solution-text">
+      独立した多値依存がそれぞれ別テーブルに分離されている。<br>
+      2行 + 2行 = 4行で済み、直積の4行より意味的にも正確。
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- Final State -->
+<!-- ════════════════════════════════════════════ -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num" style="background:#1C1C1A;color:#F5F4F0">FINAL</span>
+    <span class="step-title">最終形 ── 正規化されたテーブル一覧</span>
+  </div>
+
+  <div class="tables-split-3">
+    <div>
+      <div class="table-title">社員</div>
+      <table>
+        <tr><th>社員ID</th><th>社員名</th><th>部署ID</th></tr>
+        <tr><td class="pk">101</td><td>田中</td><td>D1</td></tr>
+        <tr><td class="pk">102</td><td>佐藤</td><td>D2</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">部署</div>
+      <table>
+        <tr><th>部署ID</th><th>部署名</th></tr>
+        <tr><td class="pk">D1</td><td>開発部</td></tr>
+        <tr><td class="pk">D2</td><td>営業部</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">講師</div>
+      <table>
+        <tr><th>講師名</th><th>科目</th></tr>
+        <tr><td class="pk">鈴木先生</td><td>数学</td></tr>
+        <tr><td class="pk">山田先生</td><td>英語</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="tables-split-3">
+    <div>
+      <div class="table-title">受講</div>
+      <table>
+        <tr><th>社員ID</th><th>講師名</th><th>成績</th></tr>
+        <tr><td class="pk">101</td><td class="pk">鈴木先生</td><td>A</td></tr>
+        <tr><td class="pk">101</td><td class="pk">山田先生</td><td>B</td></tr>
+        <tr><td class="pk">102</td><td class="pk">鈴木先生</td><td>A</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">社員スキル</div>
+      <table>
+        <tr><th>社員ID</th><th>スキル</th></tr>
+        <tr><td class="pk">101</td><td class="pk">Go</td></tr>
+        <tr><td class="pk">101</td><td class="pk">Rust</td></tr>
+        <tr><td class="pk">102</td><td class="pk">Python</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="table-title">社員趣味</div>
+      <table>
+        <tr><th>社員ID</th><th>趣味</th></tr>
+        <tr><td class="pk">101</td><td class="pk">野球</td></tr>
+        <tr><td class="pk">101</td><td class="pk">将棋</td></tr>
+        <tr><td class="pk">102</td><td class="pk">読書</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Footer ─── -->
+<div class="footer-note">
+  <strong>まとめ：</strong>
+  非正規の1テーブル（9列）が、6つの正規化されたテーブルになった。<br>
+  やったことは一貫して <strong>「独立した関心を別テーブルに分離する」</strong> だけ。<br><br>
+  <strong>1NF</strong> 1セルに1値 →
+  <strong>2NF</strong> PKの一部で決まる列を分離 →
+  <strong>3NF</strong> 非キー列で決まる列を分離 →
+  <strong>BCNF</strong> 全決定項をキーに →
+  <strong>4NF</strong> 独立な多値を分離
+</div>
+
+</body>
+</html>
